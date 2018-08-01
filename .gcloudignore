@@ -12,5 +12,12 @@
 # below:
 .git
 .gitignore
+#!include:.gitignore
 
-node_modules
+.eslintrc.json
+CHANGELOG.md
+docs
+package-lock.json
+LICENSE
+README.md
+test
