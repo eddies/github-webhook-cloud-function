@@ -1,15 +1,42 @@
 {
-  "name": "testing",
+  "name": "github-trello-cloud-function",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Update Trello from GitHub Webhooks using Google Cloud Functions",
+  "main": "src/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "coverage": "jest --coverage",
+    "lint": "eslint src test *.js",
+    "test": "jest"
   },
-  "author": "",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eddies/github-trello-cloud-function.git"
+  },
+  "keywords": [
+    "github",
+    "trello",
+    "google cloud functions",
+    "node"
+  ],
+  "author": "Edwin Shin",
   "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/eddies/github-trello-cloud-function/issues"
+  },
+  "homepage": "https://github.com/eddies/github-trello-cloud-function#readme",
   "dependencies": {},
   "devDependencies": {
-    "@google-cloud/functions-emulator": "^1.0.0-beta.4"
+    "@google-cloud/functions-emulator": "^1.0.0-beta.4",
+    "eslint": "^4.19.1",
+    "eslint-config-airbnb-base": "^13.0.0",
+    "eslint-plugin-import": "^2.13.0",
+    "jest": "^23.4.2"
+  },
+  "jest": {
+    "collectCoverageFrom": [
+      "src/**/*.js"
+    ],
+    "coverageDirectory": "build/coverage",
+    "testEnvironment": "node"
   }
 }
