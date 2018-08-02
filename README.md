@@ -82,16 +82,23 @@ npm test
 Start up the emulator:
 
 ```bash
-npx functions start --tail true --verbose true
+npx functions start
+npx functions deploy githubWebhookHandler --trigger-http
 ```
 
-In another terminal/session/screen:
+Now, you can either issue http requests against the local emulator's endpoint, e.g.:
 
 ```
 curl -H "X-Hub-Signature: sha1=3dacb5b880e25ff9d874df3daa457f3193cac51d" \
 -H "X-GitHub-Event: pull_request" -H "X-GitHub-Delivery: 123" \
 -H "Content-Type: application/json" -d '{"action":"opened","pull_request":{"html_url":"https://github.com/github/linguist/pull/11","head":{"ref":"nqPiDKmw/9-grand-canyon-national-park"}}}' \
-http://localhost:8010/<projectId>/<region>/githubToTrello
+http://localhost:8010/<projectId>/<region>/githubWebhooksHandler
+```
+
+The location of the emulator's log file can be obtained via `npx functions status`, e.g. to tail the logs:
+
+```bash
+tail -f `npx functions status | awk '/Log file/{print $(NF-1)}'`
 ```
 
 ## Contributing

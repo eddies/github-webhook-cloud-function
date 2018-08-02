@@ -38,6 +38,24 @@ test('push with invalid body', async () => {
   await expect(githubToTrello('push', req)).rejects.toThrow(/^No push message generated for refs\/heads\/nqPiDKmw\/9-grand-canyon-national-park$/);
 });
 
+test('push with invalid ref', async () => {
+  const req = {
+    body: {
+      ref: 'refs/asdf',
+    },
+  };
+  await expect(githubToTrello('push', req)).rejects.toThrow(/^Unable to parse branch name for event: push$/);
+});
+
+test('push on master', async () => {
+  const req = {
+    body: {
+      ref: 'refs/heads/master',
+    },
+  };
+  await expect(githubToTrello('push', req)).rejects.toThrow(/^Ignoring push event for master branch$/);
+});
+
 test('pull_request', async () => {
   const req = {
     body: {

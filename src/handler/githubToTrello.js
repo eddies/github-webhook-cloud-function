@@ -11,13 +11,17 @@ function getShortLink(body, githubEvent) {
   } else if (githubEvent === 'pull_request') {
     branch = body.pull_request.head.ref;
   } else {
-    throw new HTTPError(401, `Ignored unsupported event: ${githubEvent}`);
+    throw new HTTPError(400, `Unsupported event: ${githubEvent}`);
   }
 
-  if (branch && branch.indexOf('/') === 8) {
-    return branch.substring(0, 8); // The 8 character shortened ID for the card
+  if (!branch) {
+    throw new HTTPError(400, `Unable to parse branch name for event: ${githubEvent}`);
+  } else if (branch.indexOf('/') === 8) { // e.g., a branch like "nqPiDKmw/9-grand-canyon-national-park"
+    return branch.substring(0, 8); // The 8 character shortened ID for the card, e.g. "nqPiDKmw"
+  } else if (branch === 'master' || branch === 'develop') {
+    throw new HTTPError(200, `Ignoring ${githubEvent} event for ${branch} branch`);
   }
-  throw new HTTPError(401, `No shortLink found in branch ${branch}`);
+  throw new HTTPError(400, `No shortLink found in branch ${branch}`);
 }
 
 function getPushMessage(body) {
@@ -31,7 +35,7 @@ function getPushMessage(body) {
     const message = `${pusher} pushed [${repo}/${shortHash}](${commitUrl})\n\n${commitMessage}\n\nby *${commitAuthor}*`;
     return message;
   }
-  throw new HTTPError(401, `No push message generated for ${body.ref}`);
+  throw new HTTPError(400, `No push message generated for ${body.ref}`);
 }
 
 /**
