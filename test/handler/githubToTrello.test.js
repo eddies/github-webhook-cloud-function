@@ -1,7 +1,10 @@
 const { githubToTrello } = require('../../src/handler/githubToTrello');
+const trello = require('../../src/util/trello');
 
 jest.mock('../../src/util/httpsRequest');
 const { httpsRequest } = require('../../src/util/httpsRequest');
+
+// trello.postComment = jest.fn();
 
 test('push', async () => {
   const req = {
@@ -18,8 +21,34 @@ test('push', async () => {
     },
   };
 
+  const trelloSpy = jest.spyOn(trello, 'postComment');
   httpsRequest.mockResolvedValue({ id: '560bf4df7139286471dc009e' });
   const request = await githubToTrello('push', req);
+  expect(trelloSpy).toHaveBeenCalledWith('nqPiDKmw', expect.stringMatching(/^josh pushed \[linguist/));
+  expect(request.body).toEqual({ id: '560bf4df7139286471dc009e' });
+  expect(request.location).toEqual('https://trello.com/c/nqPiDKmw/#comment-560bf4df7139286471dc009e');
+});
+
+test('force push', async () => {
+  const req = {
+    body: {
+      ref: 'refs/heads/nqPiDKmw/9-grand-canyon-national-park',
+      forced: true,
+      repository: { name: 'linguist' },
+      pusher: { name: 'josh' },
+      head_commit: {
+        id: 'd1fd61921892b63b7c142b07e25ce0b153739293',
+        message: 'Define Linguist module',
+        author: { name: 'josh' },
+        url: 'https://github.com/github/linguist/commit/d1fd61921892b63b7c142b07e25ce0b153739293',
+      },
+    },
+  };
+
+  const trelloSpy = jest.spyOn(trello, 'postComment');
+  httpsRequest.mockResolvedValue({ id: '560bf4df7139286471dc009e' });
+  const request = await githubToTrello('push', req);
+  expect(trelloSpy).toHaveBeenCalledWith('nqPiDKmw', expect.stringMatching(/^josh force pushed \[linguist/));
   expect(request.body).toEqual({ id: '560bf4df7139286471dc009e' });
   expect(request.location).toEqual('https://trello.com/c/nqPiDKmw/#comment-560bf4df7139286471dc009e');
 });

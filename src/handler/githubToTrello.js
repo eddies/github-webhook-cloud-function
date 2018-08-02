@@ -27,12 +27,13 @@ function getShortLink(body, githubEvent) {
 function getPushMessage(body) {
   if (body && body.repository && body.head_commit) {
     const repo = body.repository.name;
+    const forced = body.forced ? 'force pushed' : 'pushed';
     const pusher = body.pusher.name;
     const commitMessage = body.head_commit.message;
     const commitUrl = body.head_commit.url;
     const commitAuthor = body.head_commit.author.name;
     const shortHash = body.head_commit.id.substring(0, 7);
-    const message = `${pusher} pushed [${repo}/${shortHash}](${commitUrl})\n\n${commitMessage}\n\nby *${commitAuthor}*`;
+    const message = `${pusher} ${forced} [${repo}/${shortHash}](${commitUrl})\n\n${commitMessage}\n\nby *${commitAuthor}*`;
     return message;
   }
   throw new HTTPError(400, `No push message generated for ${body.ref}`);
