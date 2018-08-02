@@ -39,6 +39,7 @@ exports.validateWebhook = ({ headers = null, body = null } = {}) => {
   if (!headers['x-hub-signature']) throw new HTTPError(400, 'Must provide X-Hub-Signature header');
   if (!headers['x-github-event']) throw new HTTPError(400, 'Must provide X-GitHub-Event header');
   if (!headers['x-github-delivery']) throw new HTTPError(400, 'Must provide X-GitHub-Delivery header');
+  console.info(`X-GitHub-Delivery: ${headers['x-github-delivery']}`);
   return verify(headers['x-hub-signature'], body);
 };
 
