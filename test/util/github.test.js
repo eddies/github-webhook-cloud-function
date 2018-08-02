@@ -14,9 +14,9 @@ test('getBranchName', () => {
 });
 
 test('validateWebhook with missing parameters', () => {
-  expect(() => validateWebhook()).toThrowError(/^Must provide headers$/);
-  expect(() => validateWebhook({ headers: null, body: null })).toThrowError(/^Must provide headers$/);
-  expect(() => validateWebhook({ headers: {} })).toThrowError(/^Must provide body$/);
+  expect(() => validateWebhook()).toThrowError(/^Bad Request$/);
+  expect(() => validateWebhook({ headers: null, body: null })).toThrowError(/^Bad Request$/);
+  expect(() => validateWebhook({ headers: {} })).toThrowError(/^Bad Request$/);
   expect(() => validateWebhook({
     headers: {},
     body: {},

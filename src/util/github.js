@@ -1,5 +1,6 @@
 const assert = require('assert');
 const crypto = require('crypto');
+const HTTPError = require('./httpError');
 
 /**
  * Generate a signature for the provided payload.
@@ -17,7 +18,13 @@ exports.sign = (payload) => {
 
 function verify(signature, body) {
   const payload = JSON.stringify(body);
-  return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(exports.sign(payload)));
+  const payloadSignature = exports.sign(payload);
+  if (signature.length === payloadSignature.length
+    && crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(payloadSignature))) {
+    return true;
+  }
+  console.info(`Provided signature (${signature}) did not match payload signature (${payloadSignature})`);
+  throw new HTTPError(401, 'X-Hub-Signature mis-match');
 }
 
 /**
@@ -27,13 +34,12 @@ function verify(signature, body) {
  * @param {object} body The body of the request.
  */
 exports.validateWebhook = ({ headers = null, body = null } = {}) => {
-  assert(headers, 'Must provide headers');
-  assert(body, 'Must provide body');
-  assert(headers['x-hub-signature'], 'Must provide X-Hub-Signature header');
-  assert(headers['x-github-event'], 'Must provide X-GitHub-Event header');
-  assert(headers['x-github-delivery'], 'Must provide X-GitHub-Delivery header');
-  assert(verify(headers['x-hub-signature'], body), 'X-Hub-Signature mis-match');
-  return true;
+  if (!headers) throw new HTTPError(400);
+  if (!body) throw new HTTPError(400);
+  if (!headers['x-hub-signature']) throw new HTTPError(400, 'Must provide X-Hub-Signature header');
+  if (!headers['x-github-event']) throw new HTTPError(400, 'Must provide X-GitHub-Event header');
+  if (!headers['x-github-delivery']) throw new HTTPError(400, 'Must provide X-GitHub-Delivery header');
+  return verify(headers['x-hub-signature'], body);
 };
 
 /**
