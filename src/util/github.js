@@ -24,7 +24,7 @@ function verify(signature, body) {
     return true;
   }
   console.info(`Provided signature (${signature}) did not match payload signature (${payloadSignature})`);
-  throw new HTTPError(401, 'X-Hub-Signature mis-match');
+  throw new HTTPError(403, 'X-Hub-Signature mis-match');
 }
 
 /**

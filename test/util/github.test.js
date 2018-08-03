@@ -14,21 +14,24 @@ test('getBranchName', () => {
 });
 
 test('validateWebhook with missing parameters', () => {
-  expect(() => validateWebhook()).toThrowError(/^Bad Request$/);
-  expect(() => validateWebhook({ headers: null, body: null })).toThrowError(/^Bad Request$/);
-  expect(() => validateWebhook({ headers: {} })).toThrowError(/^Bad Request$/);
-  expect(() => validateWebhook({
-    headers: {},
-    body: {},
-  })).toThrowError(/^Must provide X-Hub-Signature header$/);
-  expect(() => validateWebhook({
-    headers: { 'x-hub-signature': 'x' },
-    body: {},
-  })).toThrowError(/^Must provide X-GitHub-Event header$/);
-  expect(() => validateWebhook({
-    headers: { 'x-hub-signature': 'x', 'x-github-event': 'y' },
-    body: {},
-  })).toThrowError(/^Must provide X-GitHub-Delivery header$/);
+  expect(() => validateWebhook()).toThrowError(
+    expect.objectContaining({ statusCode: 400, message: 'Bad Request' }),
+  );
+  expect(() => validateWebhook({ body: null })).toThrowError(
+    expect.objectContaining({ statusCode: 400, message: 'Bad Request' }),
+  );
+  expect(() => validateWebhook({ headers: {} })).toThrowError(
+    expect.objectContaining({ statusCode: 400, message: 'Bad Request' }),
+  );
+  expect(() => validateWebhook({ headers: {}, body: {} })).toThrowError(
+    expect.objectContaining({ statusCode: 400, message: 'Must provide X-Hub-Signature header' }),
+  );
+  expect(() => validateWebhook({ headers: { 'x-hub-signature': 'x' }, body: {} })).toThrowError(
+    expect.objectContaining({ statusCode: 400, message: 'Must provide X-GitHub-Event header' }),
+  );
+  expect(() => validateWebhook({ headers: { 'x-hub-signature': 'x', 'x-github-event': 'y' }, body: {} })).toThrowError(
+    expect.objectContaining({ statusCode: 400, message: 'Must provide X-GitHub-Delivery header' }),
+  );
 });
 
 test('validateWebhook signature verification', () => {
@@ -46,7 +49,9 @@ test('validateWebhook signature verification', () => {
       'x-github-delivery': 'z',
     },
     body: { foo: 'bar' },
-  })).toThrowError(/^X-Hub-Signature mis-match$/);
+  })).toThrowError(
+    expect.objectContaining({ statusCode: 403, message: 'X-Hub-Signature mis-match' }),
+  );
 
   expect(validateWebhook({
     headers: {
