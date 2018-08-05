@@ -2,7 +2,13 @@ const { promisify } = require('util');
 const https = require('https');
 const HTTPError = require('./httpError');
 
+// Maintain persistent connections instead of creating a new connection on every function invocation
+const agent = new https.Agent({ keepAlive: true });
+
 https.request[promisify.custom] = (options, postData) => new Promise((resolve, reject) => {
+  if (!options.agent) {
+    options.agent = agent; // eslint-disable-line no-param-reassign
+  }
   const req = https.request(options, (response) => {
     if (response.statusCode < 200 || response.statusCode >= 300) {
       return reject(new HTTPError(response.statusCode));
