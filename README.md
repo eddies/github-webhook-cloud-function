@@ -45,7 +45,7 @@ Make a pull request!
   * If you've never used gcloud or deployed a Cloud Function before, run through the [Quickstart](https://cloud.google.com/functions/docs/quickstart#functions-update-install-gcloud-node8) to make sure you have a GCP project with the Cloud Functions API enabled before proceeding.
   * Generate a secret token to [validate GitHub requests](https://developer.github.com/webhooks/securing/), e.g.:
   ```bash
-  export GITHUB_SECRET=`node -e "require('crypto').randomBytes(20, (e, buf) => console.log(buf.toString('hex')));"`
+  export GITHUB_SECRET=`node -p "require('crypto').randomBytes(20).toString('hex');"`
   ```
   * Fork/clone this repo
   * Within the repo, deploy this cloud function with:
@@ -89,10 +89,21 @@ npx functions deploy githubWebhookHandler --trigger-http
 Now, you can either issue http requests against the local emulator's endpoint, e.g.:
 
 ```
-curl -H "X-Hub-Signature: sha1=3dacb5b880e25ff9d874df3daa457f3193cac51d" \
+curl -H "X-Hub-Signature: <signature>" \
 -H "X-GitHub-Event: pull_request" -H "X-GitHub-Delivery: 123" \
--H "Content-Type: application/json" -d '{"action":"opened","pull_request":{"html_url":"https://github.com/github/linguist/pull/11","head":{"ref":"nqPiDKmw/9-grand-canyon-national-park"}}}' \
-http://localhost:8010/<projectId>/<region>/githubWebhooksHandler
+-H "Content-Type: application/json" -d '{"action":"opened","pull_request":{"html_url":"https://github.com/github/linguist/pull/11","head":{"ref":"<cardId>/<cardTitle>"}}}' \
+http://localhost:8010/<projectId>/<region>/githubWebhookHandler
+```
+
+You'll need to provide the correct values for signature, cardId, cardTitle, projectId, and region.
+
+You can generate the signature for the payload with:
+
+```
+node
+const github = require('./src/util/github');
+github.sign('{"x":"y"}')
+.exit
 ```
 
 The location of the emulator's log file can be obtained via `npx functions status`, e.g. to tail the logs:
