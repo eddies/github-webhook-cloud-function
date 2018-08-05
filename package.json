@@ -26,7 +26,7 @@
   "homepage": "https://github.com/eddies/github-trello-cloud-function#readme",
   "dependencies": {},
   "devDependencies": {
-    "@google-cloud/functions-emulator": "^1.0.0-beta.4",
+    "@google-cloud/functions-emulator": "^1.0.0-beta.5",
     "eslint": "^4.19.1",
     "eslint-config-airbnb-base": "^13.0.0",
     "eslint-plugin-import": "^2.13.0",
