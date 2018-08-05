@@ -128,11 +128,11 @@ test('githubWebhookHandler POST pull_request with invalid signatures', async () 
 
   req.headers['x-hub-signature'] = 'x'.repeat(45);
   await githubWebhookHandler(req, mockRes);
-  expect(mockRes.statusCode).toBe(401);
+  expect(mockRes.statusCode).toBe(403);
   expect(mockRes.message).toBe('X-Hub-Signature mis-match');
 
   req.headers['x-hub-signature'] = 'foo';
   await githubWebhookHandler(req, mockRes);
-  expect(mockRes.statusCode).toBe(401);
+  expect(mockRes.statusCode).toBe(403);
   expect(mockRes.message).toBe('X-Hub-Signature mis-match');
 });
