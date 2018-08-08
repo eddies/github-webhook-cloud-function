@@ -81,9 +81,40 @@ test('githubWebhookHandler POST pull_request', async () => {
     },
   };
 
-  httpsRequest.mockResolvedValue({ id: '560bf4df7139286471dc009e' });
+  httpsRequest
+    .mockReturnValueOnce({ id: '560bf4df7139286471dc009e' }) // postUrlAttachment
+    .mockReturnValueOnce({ id: '5b61cb39d057323aaa8500b8' }) // getBoardId
+    .mockReturnValueOnce([]) // getCustomFields
+    .mockReturnValueOnce({ // postCustomFields
+      id: '5b6be1a48dc4214d1313b650',
+      idModel: '5b61cb39d057323aaa8500b8',
+      modelType: 'board',
+      fieldGroup: '3ac58266f323d0ff02ab458154fe4e2fcf27d7c63beda514c5ab19cdbdf0558c',
+      display: { cardFront: true },
+      name: 'PR',
+      pos: 24576,
+      options: [
+        {
+          id: '5b6be1a48dc4214d1313b652',
+          idCustomField: '5b6be1a48dc4214d1313b650',
+          value: {
+            text: 'Open',
+          },
+          color: 'green',
+          pos: 36864,
+        },
+      ],
+      type: 'list',
+    })
+    .mockReturnValueOnce({ // putCustomFieldList
+      id: '5b6be1a48dc4214d1313b652',
+      idValue: '5b6be1a48dc4214d1313b653',
+      idCustomField: '5b6be1a48dc4214d1313b650',
+      idModel: '5b61cb39d057323aaa8500b8',
+      modelType: 'card',
+    });
   await githubWebhookHandler(req, mockRes);
-  expect(mockRes.message).toEqual({ id: '560bf4df7139286471dc009e' });
+  expect(mockRes.message.id).toEqual('5b6be1a48dc4214d1313b652');
   expect(mockRes.statusCode).toBe(201);
 });
 

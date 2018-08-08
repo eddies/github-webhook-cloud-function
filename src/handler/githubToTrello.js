@@ -39,6 +39,59 @@ function getPushMessage(body) {
   throw new HTTPError(400, `No push message generated for ${body.ref}`);
 }
 
+async function updatePrStatus(body, status) {
+  const shortLink = getShortLink(body, 'pull_request');
+
+  if (status === 'Open') {
+    const url = body.pull_request.html_url;
+    const attachmentUrl = await trello.postUrlAttachment(shortLink, url);
+    console.info('Created PR attachment: ', attachmentUrl.location);
+  }
+
+  const boardId = await trello.getBoardId(shortLink);
+  const customFields = await trello.getCustomFields(boardId);
+  let prFields = customFields.filter(el => el.name === 'PR')[0];
+  if (!prFields) {
+    // create board-level PR custom fields
+    try {
+      prFields = await trello.postCustomFields(boardId, [
+        {
+          color: 'green',
+          value: {
+            text: 'Open',
+          },
+          pos: 1024,
+        },
+        {
+          color: 'red',
+          value: {
+            text: 'Closed',
+          },
+          pos: 2048,
+        },
+        {
+          color: 'purple',
+          value: {
+            text: 'Merged',
+          },
+          pos: 4096,
+        },
+      ]);
+    } catch (err) {
+      if (err instanceof HTTPError && err.statusCode === 403) {
+        err.message = `Custom Fields Power-Up not enabled for board ${boardId}`;
+      }
+      throw err;
+    }
+  }
+
+  const statusOption = prFields.options.filter(el => el.value.text === status)[0];
+  if (!statusOption) {
+    throw new HTTPError(500, `Custom Fields for PR missing status ${status}`);
+  }
+  return trello.putCustomFieldList(shortLink, statusOption.idCustomField, statusOption.id);
+}
+
 /**
  * Posts a Trello comment or attachment in response to a GitHub Webhook Event.
  *
@@ -53,10 +106,16 @@ exports.githubToTrello = async (event, req) => {
     request = await trello.postComment(shortLink, comment);
   } else if (event === 'pull_request') {
     const { action } = req.body;
+    const merged = req.body.pull_request ? req.body.pull_request.merged : false;
     if (action === 'opened') {
-      const shortLink = getShortLink(req.body, event);
-      const url = req.body.pull_request.html_url;
-      request = await trello.postUrlAttachment(shortLink, url);
+      // set PR status to open
+      request = await updatePrStatus(req.body, 'Open');
+    } else if (action === 'closed' && merged) {
+      // set PR status to merged
+      request = await updatePrStatus(req.body, 'Merged');
+    } else if (action === 'closed' && !merged) {
+      // set PR status to closed
+      request = await updatePrStatus(req.body, 'Closed');
     } else {
       request.body = `Ignored unsupported pull_request action: ${action}`;
     }
