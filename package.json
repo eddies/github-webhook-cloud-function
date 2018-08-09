@@ -10,7 +10,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/eddies/github-trello-cloud-function.git"
+    "url": "git+https://github.com/eddies/github-webhook-cloud-function.git"
   },
   "keywords": [
     "github",
@@ -21,9 +21,9 @@
   "author": "Edwin Shin",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/eddies/github-trello-cloud-function/issues"
+    "url": "https://github.com/eddies/github-webhook-cloud-function/issues"
   },
-  "homepage": "https://github.com/eddies/github-trello-cloud-function#readme",
+  "homepage": "https://github.com/eddies/github-webhook-cloud-function#readme",
   "dependencies": {},
   "devDependencies": {
     "@google-cloud/functions-emulator": "^1.0.0-beta.5",
