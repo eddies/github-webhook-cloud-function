@@ -10,7 +10,7 @@ const { httpsRequest } = require('../../src/util/httpsRequest');
 test('push', async () => {
   const req = {
     body: {
-      ref: 'refs/heads/nqPiDKmw/9-grand-canyon-national-park',
+      ref: 'refs/heads/9-grand-canyon-national-park#nqPiDKmw',
       repository: { name: 'linguist' },
       pusher: { name: 'josh' },
       head_commit: {
@@ -33,7 +33,7 @@ test('push', async () => {
 test('force push', async () => {
   const req = {
     body: {
-      ref: 'refs/heads/nqPiDKmw/9-grand-canyon-national-park',
+      ref: 'refs/heads/9-grand-canyon-national-park#nqPiDKmw',
       forced: true,
       repository: { name: 'linguist' },
       pusher: { name: 'josh' },
@@ -62,10 +62,10 @@ test('unsupported event', async () => {
 test('push with invalid body', async () => {
   const req = {
     body: {
-      ref: 'refs/heads/nqPiDKmw/9-grand-canyon-national-park',
+      ref: 'refs/heads/9-grand-canyon-national-park#nqPiDKmw',
     },
   };
-  await expect(githubToTrello('push', req)).rejects.toThrow(/^No push message generated for refs\/heads\/nqPiDKmw\/9-grand-canyon-national-park$/);
+  await expect(githubToTrello('push', req)).rejects.toThrow(/^No push message generated for refs\/heads\/9-grand-canyon-national-park#nqPiDKmw$/);
 });
 
 test('push with invalid ref', async () => {
@@ -92,7 +92,7 @@ test('pull_request', async () => {
       action: 'opened',
       pull_request: {
         html_url: 'https://github.com/github/linguist/pull/11',
-        head: { ref: 'nqPiDKmw/9-grand-canyon-national-park' },
+        head: { ref: '9-grand-canyon-national-park#nqPiDKmw' },
       },
     },
   };
@@ -141,7 +141,7 @@ test('pull_request closed but not merged', async () => {
       action: 'closed',
       pull_request: {
         html_url: 'https://github.com/github/linguist/pull/11',
-        head: { ref: 'nqPiDKmw/9-grand-canyon-national-park' },
+        head: { ref: '9-grand-canyon-national-park#nqPiDKmw' },
         merged: false,
       },
     },
@@ -174,7 +174,7 @@ test('pull_request closed and merged', async () => {
       action: 'closed',
       pull_request: {
         html_url: 'https://github.com/github/linguist/pull/11',
-        head: { ref: 'nqPiDKmw/9-grand-canyon-national-park' },
+        head: { ref: '9-grand-canyon-national-park#nqPiDKmw' },
         merged: true,
       },
     },
@@ -207,7 +207,7 @@ test('pull_request customfieldsx not enabled', async () => {
       action: 'closed',
       pull_request: {
         html_url: 'https://github.com/github/linguist/pull/11',
-        head: { ref: 'nqPiDKmw/9-grand-canyon-national-park' },
+        head: { ref: '9-grand-canyon-national-park#nqPiDKmw' },
       },
     },
   };
@@ -230,7 +230,7 @@ test('pull_request missingx status option', async () => {
       action: 'closed',
       pull_request: {
         html_url: 'https://github.com/github/linguist/pull/11',
-        head: { ref: 'nqPiDKmw/9-grand-canyon-national-park' },
+        head: { ref: '9-grand-canyon-national-park#nqPiDKmw' },
       },
     },
   };
@@ -273,7 +273,7 @@ test('pull_request with unsupported action', async () => {
       action: 'labeled',
       pull_request: {
         html_url: 'https://github.com/github/linguist/pull/11',
-        head: { ref: 'nqPiDKmw/9-grand-canyon-national-park' },
+        head: { ref: '9-grand-canyon-national-park#nqPiDKmw' },
       },
     },
   };

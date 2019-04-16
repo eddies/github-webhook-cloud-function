@@ -10,13 +10,13 @@ Implemented for the [Node 8 runtime](https://cloud.google.com/functions/docs/con
 
 The default handler, `githubToTrello`, posts comments and attachments to Trello when there is a GitHub push or pull request.
 
-For example, Alice's team uses a Trello board, where a card is created per feature. When Alice starts working on a card, she follows a git branch naming convention that allows her to just copy-and-paste the latter part of the card's url:
+For example, Alice's team uses a Trello board, where a card is created per feature. When Alice starts working on a card, she follows a naming convention where she appends the card's shortLink (here, `nqPiDKmw`) to her git branch name:
 
 > https://trello.com/c/nqPiDKmw/9-grand-canyon-national-park
 
 becomes a new branch with:
 ```bash
-git checkout -b nqPiDKmw/9-grand-canyon-national-park
+git checkout -b my-branch-name#nqPiDKmw
 ```
 
 Now whenever Alice pushes to GitHub, a webhook fires to our Cloud Function, which parses the branch name for the card id (here, `nqPiDKmw`), and automatically adds a comment to the card that links back to the head commit of the push.
