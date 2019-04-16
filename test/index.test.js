@@ -68,7 +68,7 @@ test('githubWebhookHandler POST pull_request', async () => {
     ip: '127.0.0.1',
     headers: {
       'user-agent': 'GitHub-Hookshot/1234ab3',
-      'x-hub-signature': 'sha1=3893bc155724732fc4fdd78d8d666f8be160d11b',
+      'x-hub-signature': 'sha1=5f5e157a36649013ac9868b2363013635016cf22',
       'x-github-event': 'pull_request',
       'x-github-delivery': 'y',
     },
@@ -76,7 +76,7 @@ test('githubWebhookHandler POST pull_request', async () => {
       action: 'opened',
       pull_request: {
         html_url: 'https://github.com/github/linguist/pull/11',
-        head: { ref: 'nqPiDKmw/9-grand-canyon-national-park' },
+        head: { ref: '9-grand-canyon-national-park#nqPiDKmw' },
       },
     },
   };
