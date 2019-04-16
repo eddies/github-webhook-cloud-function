@@ -16,8 +16,10 @@ function getShortLink(body, githubEvent) {
 
   if (!branch) {
     throw new HTTPError(400, `Unable to parse branch name for event: ${githubEvent}`);
-  } else if (branch.includes('#')) { // e.g., a branch like "my-branch-name#nqPiDKmw"
-    return branch.split('#').pop(); // The 8 character shortened ID for the card, e.g. "nqPiDKmw"
+  } else if (branch.charAt(branch.length - 9) === '#') { // e.g., a branch like "my-branch-name#nqPiDKmw"
+    return branch.slice(-8); // The 8 character shortened ID for the card, e.g. "nqPiDKmw"
+  } else if (branch.indexOf('/') === 8) { // e.g., a branch like "nqPiDKmw/9-grand-canyon-national-park"
+    return branch.slice(0, 8); // The 8 character shortened ID for the card, e.g. "nqPiDKmw"
   } else if (branch === 'master' || branch === 'develop') {
     throw new HTTPError(200, `Ignoring ${githubEvent} event for ${branch} branch`);
   }
