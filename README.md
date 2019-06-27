@@ -4,7 +4,7 @@
 
 A [Google Cloud Function](https://cloud.google.com/functions/) that handles [GitHub Webhook](https://developer.github.com/webhooks/) events.
 
-Implemented for the [Node 8 runtime](https://cloud.google.com/functions/docs/concepts/nodejs-8-runtime) with no additional runtime dependencies.
+Implemented for the [Node 10 runtime](https://cloud.google.com/functions/docs/concepts/nodejs-10-runtime) with no additional runtime dependencies.
 
 ## GitHub to Trello
 
@@ -15,8 +15,8 @@ For example, Alice's team uses a Trello board, where a card is created per featu
 > https://trello.com/c/nqPiDKmw/9-grand-canyon-national-park
 
 becomes a new branch with:
-```bash
-git checkout -b my-branch-name#nqPiDKmw
+```console
+$ git checkout -b my-branch-name#nqPiDKmw
 ```
 
 Now whenever Alice pushes to GitHub, a webhook fires to our Cloud Function, which parses the branch name for the card id (here, `nqPiDKmw`), and automatically adds a comment to the card that links back to the head commit of the push.
@@ -39,23 +39,23 @@ Make a pull request!
 1. Trello
   * Get your Developer API Key & generate a Token: https://trello.com/app-key
   * Set environment variables for the API key and token:
-  ```bash
-  export TRELLO_API_KEY=<your key here>
-  export TRELLO_TOKEN=<your token here>
+  ```console
+  $ export TRELLO_API_KEY=<your key here>
+  $ export TRELLO_TOKEN=<your token here>
   ```
 2. Google Cloud Functions
-  * If you've never used gcloud or deployed a Cloud Function before, run through the [Quickstart](https://cloud.google.com/functions/docs/quickstart#functions-update-install-gcloud-node8) to make sure you have a GCP project with the Cloud Functions API enabled before proceeding.
+  * If you've never used gcloud or deployed a Cloud Function before, run through the [Quickstart](https://cloud.google.com/functions/docs/quickstart#functions-deploy-command-node10) to make sure you have a GCP project with the Cloud Functions API enabled before proceeding.
   * Generate a secret token to [validate GitHub requests](https://developer.github.com/webhooks/securing/), e.g.:
   ```bash
-  export GITHUB_SECRET=`node -p "require('crypto').randomBytes(20).toString('hex');"`
+  export GITHUB_SECRET=$(node -p "require('crypto').randomBytes(20).toString('hex');")
   ```
   * Fork/clone this repo
   * Within the repo, deploy this cloud function with:
-  ```
-  gcloud beta functions deploy githubWebhookHandler \
-  --trigger-http --runtime nodejs8 --memory 128MB \
+  ```console
+  $ gcloud functions deploy githubWebhookHandler \
+  --trigger-http --runtime nodejs10 --memory 128MB \
   --set-env-vars GITHUB_SECRET=$GITHUB_SECRET,TRELLO_API_KEY=$TRELLO_API_KEY,TRELLO_TOKEN=$TRELLO_TOKEN \
-  --project `gcloud config list --format 'value(core.project)'`
+  --project $(gcloud config list --format 'value(core.project)')
   ```
   * Note the URL of your Cloud Function (also obtainable with: `gcloud functions describe githubToTrello --format 'value(httpsTrigger.url)'`)
 3. GitHub
@@ -64,55 +64,48 @@ Make a pull request!
 https://<GCP_REGION>-<PROJECT_ID>.cloudfunctions.net/githubToTrello`
     * *Content type*: `application/json`
     * *Secret*: the token (`$GITHUB_SECRET`) you generated in step 2
-    * *Let me select individual events*: `Pushes` and `Pull Requests`
+    * *Let me select individual events*: `Pushes`, `Pull requests`, and `Pull request reviews`
 
 
 ## Testing
 
 ### Prerequisites
-* Node 8
-* npm 5.2.0 or later (yarn should be fine as well)
+* Node 10
+* npm 5.6.0 or later (yarn should be fine as well)
 
 ### Unit tests
-```bash
-npm install
-npm test
+```console
+$ npm install
+$ npm test
 ```
 
 ### Ad-hoc tests
 
-Start up the emulator:
+Spin up the local development server:
 
-```bash
-npx functions start
-npx functions deploy githubWebhookHandler --trigger-http
+```console
+$ npm start
 ```
 
-Now, you can either issue http requests against the local emulator's endpoint, e.g.:
-
+Craft a webhook payload (ensuring the `ref` points to a Trello board you have write permissions to):
+```console
+$ payload='{"action":"opened","pull_request":{"html_url":"https://github.com/github/linguist/pull/11","head":{"ref":"9-grand-canyon-national-park#nqPiDKmw"}}}'
+$ signature=$(node -p "github = require('./src/util/github');github.sign('${payload}')")
 ```
-curl -H "X-Hub-Signature: <signature>" \
+
+Issue requests against the local endpoint, e.g.:
+
+```console
+$ curl -H "X-Hub-Signature: ${signature}" \
 -H "X-GitHub-Event: pull_request" -H "X-GitHub-Delivery: 123" \
--H "Content-Type: application/json" -d '{"action":"opened","pull_request":{"html_url":"https://github.com/github/linguist/pull/11","head":{"ref":"<cardId>/<cardTitle>"}}}' \
-http://localhost:8010/<projectId>/<region>/githubWebhookHandler
+-H "Content-Type: application/json" -d ${payload} \
+http://localhost:8080
 ```
 
-You'll need to provide the correct values for signature, cardId, cardTitle, projectId, and region.
+For local testing of actual GitHub events:
 
-You can generate the signature for the payload with:
-
-```
-node
-const github = require('./src/util/github');
-github.sign('{"x":"y"}')
-.exit
-```
-
-The location of the emulator's log file can be obtained via `npx functions status`, e.g. to tail the logs:
-
-```bash
-tail -f `npx functions status | awk '/Log file/{print $(NF-1)}'`
-```
+1. `npx smee -p 8080`
+2. Enter the url returned from the above command, e.g. "https://smee.io/abc123" as your GitHub repo's "Webhook URL"
 
 ## Contributing
 Contributions welcome! Please see [CONTRIBUTING.md](docs/CONTRIBUTING.md).

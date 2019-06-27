@@ -15,6 +15,7 @@
 #!include:.gitignore
 
 .eslintrc.json
+.travis.yml
 CHANGELOG.md
 docs
 package-lock.json
