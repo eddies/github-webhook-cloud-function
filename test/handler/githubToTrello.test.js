@@ -305,7 +305,96 @@ test('pull_request closed and merged', async () => {
   expect(request.location).toEqual('https://trello.com/c/nqPiDKmw');
 });
 
-test('pull_request customfieldsx not enabled', async () => {
+test('pull_request review_requested', async () => {
+  const req = {
+    body: {
+      action: 'review_requested',
+      pull_request: {
+        html_url: 'https://github.com/github/linguist/pull/11',
+        head: { ref: '9-grand-canyon-national-park#nqPiDKmw' },
+        merged: false,
+        requested_reviewers: [
+          {
+            login: 'alice',
+          },
+          {
+            login: 'bob',
+          },
+        ],
+      },
+    },
+  };
+
+  httpsRequest
+    .mockReturnValueOnce({ id: '5b61cb39d057323aaa8500b8' }) // getBoardId
+    .mockReturnValueOnce([{ // getCustomFields (truncated)
+      name: 'PR',
+      options: [
+        {
+          value: {
+            text: 'Open',
+          },
+        },
+      ],
+    },
+    {
+      name: 'Review',
+      pos: 73728,
+      type: 'text',
+    }])
+    .mockReturnValueOnce({ // putCustomField (truncated)
+      id: '5b6be1a48dc4214d1313b652',
+    });
+
+  const request = await githubToTrello('pull_request', req);
+  expect(request.body.id).toEqual('5b6be1a48dc4214d1313b652');
+  expect(request.location).toEqual('https://trello.com/c/nqPiDKmw');
+});
+
+test('pull_request review_request_removed', async () => {
+  const req = {
+    body: {
+      action: 'review_request_removed',
+      pull_request: {
+        html_url: 'https://github.com/github/linguist/pull/11',
+        head: { ref: '9-grand-canyon-national-park#nqPiDKmw' },
+        merged: false,
+        requested_reviewers: [
+          {
+            login: 'alice',
+          },
+        ],
+      },
+    },
+  };
+
+  httpsRequest
+    .mockReturnValueOnce({ id: '5b61cb39d057323aaa8500b8' }) // getBoardId
+    .mockReturnValueOnce([{ // getCustomFields (truncated)
+      name: 'PR',
+      options: [
+        {
+          value: {
+            text: 'Open',
+          },
+        },
+      ],
+    },
+    {
+      name: 'Review',
+      pos: 73728,
+      type: 'text',
+    }])
+    .mockReturnValueOnce({ // putCustomField (truncated)
+      id: '5b6be1a48dc4214d1313b652',
+    });
+
+  const request = await githubToTrello('pull_request', req);
+  expect(request.body.id).toEqual('5b6be1a48dc4214d1313b652');
+  expect(request.location).toEqual('https://trello.com/c/nqPiDKmw');
+});
+
+test('pull_request customfields not enabled', async () => {
   const req = {
     body: {
       action: 'closed',
@@ -328,7 +417,7 @@ test('pull_request customfieldsx not enabled', async () => {
   );
 });
 
-test('pull_request missingx status option', async () => {
+test('pull_request missing status option', async () => {
   const req = {
     body: {
       action: 'closed',

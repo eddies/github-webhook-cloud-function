@@ -144,3 +144,26 @@ exports.putCustomFieldList = async (cardId, idCustomField, idValue) => {
   console.info(`Updated custom field: ${request.idCustomField} on https://trello.com/c/${cardId}`);
   return { location: `https://trello.com/c/${cardId}`, body: request };
 };
+
+exports.putCustomField = async (cardId, idCustomField, value) => {
+  const putData = JSON.stringify({
+    value,
+    key: apiKey,
+    token,
+  });
+
+  const options = {
+    hostname: 'api.trello.com',
+    port: 443,
+    path: `/1/card/${cardId}/customField/${idCustomField}/item`,
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'Content-Length': Buffer.byteLength(putData),
+    },
+  };
+
+  const request = await httpsRequest(options, putData);
+  console.info(`Updated custom field: ${request.idCustomField} on https://trello.com/c/${cardId}`);
+  return { location: `https://trello.com/c/${cardId}`, body: request };
+};

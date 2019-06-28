@@ -94,6 +94,36 @@ async function updatePrStatus(body, status) {
   return trello.putCustomFieldList(shortLink, statusOption.idCustomField, statusOption.id);
 }
 
+async function updateReviewStatus(body) {
+  const reviewers = body.pull_request.requested_reviewers.map(reviewer => reviewer.login);
+  let reviewersText = reviewers.join(', ');
+  if (body.action === 'submitted' && body.review) {
+    if (body.review.state === 'changes_requested') {
+      reviewersText = `⭕ ${reviewersText}`;
+    }
+    if (body.review.state === 'approved' && reviewers.length === 0) {
+      reviewersText = `✅ ${reviewersText}`;
+    }
+  }
+
+  const shortLink = getShortLink(body, 'pull_request');
+  const boardId = await trello.getBoardId(shortLink);
+  const customFields = await trello.getCustomFields(boardId);
+  let reviewField = customFields.filter(el => el.name === 'Review')[0];
+  if (!reviewField) {
+    // create board-level Review custom field
+    try {
+      reviewField = await trello.postCustomFields(boardId, null, 'Review', 'text');
+    } catch (err) {
+      if (err instanceof HTTPError && err.statusCode === 403) {
+        err.message = `Custom Fields Power-Up not enabled for board ${boardId}`;
+      }
+      throw err;
+    }
+  }
+  return trello.putCustomField(shortLink, reviewField.id, reviewersText ? { text: reviewersText } : '');
+}
+
 /**
  * Posts a Trello comment or attachment in response to a GitHub Webhook Event.
  *
@@ -109,7 +139,7 @@ exports.githubToTrello = async (event, req) => {
   } else if (event === 'pull_request') {
     const { action } = req.body;
     const merged = req.body.pull_request ? req.body.pull_request.merged : false;
-    if (action === 'opened') {
+    if (action === 'opened' || action === 'reopened') {
       // set PR status to open
       request = await updatePrStatus(req.body, 'Open');
     } else if (action === 'closed' && merged) {
@@ -118,9 +148,22 @@ exports.githubToTrello = async (event, req) => {
     } else if (action === 'closed' && !merged) {
       // set PR status to closed
       request = await updatePrStatus(req.body, 'Closed');
+    } else if (action === 'review_requested') {
+      request = await updateReviewStatus(req.body);
+    } else if (action === 'review_request_removed') {
+      request = await updateReviewStatus(req.body);
     } else {
       request.body = `Ignored unsupported pull_request action: ${action}`;
     }
+  } else if (event === 'pull_request_review') {
+    // a new review requesting changes will have:
+    //   action === 'submitted'
+    //   review.state === 'changes_requested'
+    // approved changes will have:
+    //   action === 'submitted'
+    //   review.state === 'approved'
+    //   pull_request.requested_reviewers array will have one fewer element
+    request = await updateReviewStatus(req.body);
   } else {
     request.body = `Ignored unsupported event: ${event}`;
   }
