@@ -97,12 +97,13 @@ async function updatePrStatus(body, status) {
 async function updateReviewStatus(body) {
   const reviewers = body.pull_request.requested_reviewers.map(reviewer => reviewer.login);
   let reviewersText = reviewers.join(', ');
-  if (body.action === 'submitted' && body.review) {
+  if (body.review) {
     if (body.review.state === 'changes_requested') {
       reviewersText = `⭕ ${reviewersText}`;
     } else if (body.review.state === 'approved' && reviewers.length === 0) {
       reviewersText = `✅ ${reviewersText}`;
     } else {
+      // e.g. review.state === 'commented'
       return { body: `Ignored PR review event for review.state: ${body.review.state}` };
     }
   }
