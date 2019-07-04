@@ -100,9 +100,10 @@ async function updateReviewStatus(body) {
   if (body.action === 'submitted' && body.review) {
     if (body.review.state === 'changes_requested') {
       reviewersText = `⭕ ${reviewersText}`;
-    }
-    if (body.review.state === 'approved' && reviewers.length === 0) {
+    } else if (body.review.state === 'approved' && reviewers.length === 0) {
       reviewersText = `✅ ${reviewersText}`;
+    } else {
+      return { body: `Ignored PR review event for review.state: ${body.review.state}` };
     }
   }
 
