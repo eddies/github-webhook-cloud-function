@@ -52,7 +52,7 @@ async function updatePrStatus(body, status) {
 
   const boardId = await trello.getBoardId(shortLink);
   const customFields = await trello.getCustomFields(boardId);
-  let prFields = customFields.filter(el => el.name === 'PR')[0];
+  let prFields = customFields.filter((el) => el.name === 'PR')[0];
   if (!prFields) {
     // create board-level PR custom fields
     try {
@@ -87,7 +87,7 @@ async function updatePrStatus(body, status) {
     }
   }
 
-  const statusOption = prFields.options.filter(el => el.value.text === status)[0];
+  const statusOption = prFields.options.filter((el) => el.value.text === status)[0];
   if (!statusOption) {
     throw new HTTPError(500, `Custom Fields for PR missing status ${status}`);
   }
@@ -95,7 +95,7 @@ async function updatePrStatus(body, status) {
 }
 
 async function updateReviewStatus(body) {
-  const reviewers = body.pull_request.requested_reviewers.map(reviewer => reviewer.login);
+  const reviewers = body.pull_request.requested_reviewers.map((reviewer) => reviewer.login);
   let reviewersText = reviewers.join(', ');
   if (body.review) {
     if (body.review.state === 'changes_requested') {
@@ -111,7 +111,7 @@ async function updateReviewStatus(body) {
   const shortLink = getShortLink(body, 'pull_request');
   const boardId = await trello.getBoardId(shortLink);
   const customFields = await trello.getCustomFields(boardId);
-  let reviewField = customFields.filter(el => el.name === 'Review')[0];
+  let reviewField = customFields.filter((el) => el.name === 'Review')[0];
   if (!reviewField) {
     // create board-level Review custom field
     try {
